@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>For You, Always</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Libre+Baskerville:ital@0;1&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #f5f0e8;
+    --warm: #e8ddd0;
+    --rose: #c17b6b;
+    --deep: #2c1f1a;
+    --ink: #3d2b24;
+    --gold: #b89060;
+    --blush: #e8c4b8;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--cream);
+    color: var(--ink);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.5;
+  }
+
+  /* ── MUSIC PLAYER ── */
+  .music-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 500;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--rose);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(193,123,107,0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+    color: white;
+    font-size: 1.2rem;
+  }
+
+  .music-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 28px rgba(193,123,107,0.55);
+  }
+
+  .music-btn .ripple {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid var(--rose);
+    animation: ripple-out 2s ease-out infinite;
+    opacity: 0;
+  }
+
+  .music-btn .ripple:nth-child(2) { animation-delay: 0.7s; }
+
+  @keyframes ripple-out {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+
+  .music-btn.paused .ripple { animation: none; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 3rem 2rem;
+    position: relative;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%, #f0e6d8 0%, transparent 70%),
+      var(--cream);
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 120px;
+    background: linear-gradient(to bottom, transparent, var(--cream));
+  }
+
+  .petal-ring {
+    font-size: 2.2rem;
+    letter-spacing: 0.5rem;
+    color: var(--rose);
+    opacity: 0.4;
+    margin-bottom: 2rem;
+    animation: spin-slow 30s linear infinite;
+  }
+
+  @keyframes spin-slow { to { transform: rotate(360deg); } }
+
+  .hero-eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.3rem;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: rise 1.2s ease forwards 0.3s;
+  }
+
+  .hero-title {
+    font-size: clamp(3rem, 10vw, 6.5rem);
+    font-weight: 300;
+    line-height: 1.05;
+    color: var(--deep);
+    margin-bottom: 1rem;
+    opacity: 0;
+    animation: rise 1.4s ease forwards 0.5s;
+  }
+
+  .hero-title em { font-style: italic; color: var(--rose); }
+
+  .hero-subtitle {
+    font-size: 1.2rem;
+    font-style: italic;
+    color: var(--ink);
+    opacity: 0;
+    animation: rise 1.4s ease forwards 0.8s;
+    max-width: 400px;
+    line-height: 1.8;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--gold);
+    font-size: 0.7rem;
+    letter-spacing: 0.2rem;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: rise 1s ease forwards 1.5s;
+  }
+
+  .scroll-arrow {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    animation: pulse-down 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-down {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── LETTER ── */
+  .letter-section {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 5rem 2.5rem;
+  }
+
+  .section-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.3rem;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .section-label::before,
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+    opacity: 0.4;
+  }
+
+  .letter-card {
+    background: #fdf8f2;
+    border: 1px solid rgba(184,144,96,0.2);
+    padding: 3rem 3.5rem;
+    position: relative;
+    box-shadow:
+      0 2px 4px rgba(44,31,26,0.04),
+      0 12px 40px rgba(44,31,26,0.06),
+      inset 0 0 0 1px rgba(255,255,255,0.6);
+  }
+
+  .letter-card::before {
+    content: '"';
+    position: absolute;
+    top: -0.5rem;
+    left: 2.5rem;
+    font-size: 8rem;
+    color: var(--rose);
+    opacity: 0.12;
+    line-height: 1;
+    font-family: Georgia, serif;
+  }
+
+  .letter-body {
+    font-size: 1.15rem;
+    line-height: 2;
+    color: var(--ink);
+    font-style: italic;
+  }
+
+  .letter-body p + p { margin-top: 1.4rem; }
+
+  .letter-sign {
+    margin-top: 2.5rem;
+    text-align: right;
+    font-size: 1.4rem;
+    color: var(--rose);
+  }
+
+  /* ── PHOTOS ── */
+  .photos-section {
+    padding: 4rem 2rem 4rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .photos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2.5rem;
+  }
+
+  .photo-card {
+    position: relative;
+    background: #fdf8f2;
+    border: 1px solid rgba(184,144,96,0.15);
+    padding: 1.2rem 1.2rem 1.8rem;
+    box-shadow: 0 4px 20px rgba(44,31,26,0.06);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  .photo-card:hover {
+    box-shadow: 0 16px 48px rgba(44,31,26,0.12);
+  }
+
+  .photo-card:nth-child(3n+1) { transform: rotate(-0.8deg); }
+  .photo-card:nth-child(3n+2) { transform: rotate(0.5deg); }
+  .photo-card:nth-child(3n)   { transform: rotate(-0.3deg); }
+
+  .photo-card:nth-child(3n+1):hover { transform: rotate(-0.4deg) translateY(-6px); }
+  .photo-card:nth-child(3n+2):hover { transform: rotate(0.8deg) translateY(-6px); }
+  .photo-card:nth-child(3n):hover   { transform: rotate(0.2deg) translateY(-6px); }
+
+  .photo-card::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-1deg);
+    width: 50px;
+    height: 20px;
+    background: rgba(232,196,184,0.5);
+    border-radius: 1px;
+  }
+
+  .photo-frame {
+    width: 100%;
+    aspect-ratio: 4/3;
+    background: var(--warm);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    cursor: zoom-in;
+  }
+
+  .photo-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    color: rgba(44,31,26,0.25);
+    font-size: 0.75rem;
+    letter-spacing: 0.15rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .photo-placeholder:hover { background: rgba(193,123,107,0.06); }
+
+  .photo-placeholder svg {
+    width: 36px;
+    height: 36px;
+    stroke: rgba(193,123,107,0.4);
+    fill: none;
+    stroke-width: 1.2;
+  }
+
+  .photo-caption {
+    margin-top: 1rem;
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--ink);
+    line-height: 1.6;
+    text-align: center;
+    outline: none;
+    border: none;
+    background: transparent;
+    width: 100%;
+    font-family: inherit;
+    cursor: text;
+  }
+
+  .photo-caption:focus {
+    border-bottom: 1px dashed var(--gold);
+  }
+
+  .photo-date {
+    font-size: 0.65rem;
+    letter-spacing: 0.15rem;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-align: center;
+    margin-top: 0.5rem;
+    outline: none;
+    border: none;
+    background: transparent;
+    width: 100%;
+    font-family: inherit;
+    cursor: text;
+  }
+
+  .photo-date:focus {
+    border-bottom: 1px dashed var(--gold);
+  }
+
+  /* ── ADD MORE BUTTON ── */
+  .add-more-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 3rem 0 5rem;
+  }
+
+  .add-more-btn {
+    background: transparent;
+    border: 1px solid rgba(193,123,107,0.4);
+    color: var(--rose);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1rem;
+    font-style: italic;
+    letter-spacing: 0.1rem;
+    padding: 0.9rem 2.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .add-more-btn:hover {
+    background: var(--rose);
+    color: white;
+    border-color: var(--rose);
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    padding: 3rem 2rem 6rem;
+    font-size: 1.6rem;
+    color: var(--rose);
+    font-style: italic;
+    opacity: 0.7;
+  }
+
+  .heart-float {
+    display: inline-block;
+    animation: heartbeat 2s ease-in-out infinite;
+  }
+
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.2); }
+    50% { transform: scale(1); }
+    75% { transform: scale(1.15); }
+  }
+
+  input[type="file"] { display: none; }
+
+  /* ── LIGHTBOX ── */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(44,31,26,0.92);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .lightbox.open { opacity: 1; pointer-events: all; }
+
+  .lightbox img {
+    max-width: 90vw;
+    max-height: 85vh;
+    object-fit: contain;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.5);
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 1.5rem;
+    right: 2rem;
+    color: var(--cream);
+    font-size: 2rem;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+
+  .lightbox-close:hover { opacity: 1; }
+
+  @media (max-width: 600px) {
+    .letter-card { padding: 2rem 1.8rem; }
+    .photos-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MUSIC -->
+<audio id="bgMusic" loop>
+  <source src="https://www.dropbox.com/scl/fi/aaxluluhe4zluow9v09qv/Tum-Hi-Ho-Aashiqui-2-320-Kbps-1-_-cut_70sec.mp3?rlkey=sqs9hrubhsqohac1blx8xb7zu&st=q7cnwszi&raw=1" type="audio/mpeg" />
+</audio>
+
+<button class="music-btn paused" id="musicBtn" title="Toggle music">
+  <span class="ripple"></span>
+  <span class="ripple"></span>
+  <span id="musicIcon">♪</span>
+</button>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="petal-ring">✿ ✾ ✿ ✾ ✿</div>
+  <p class="hero-eyebrow">A little something made with love</p>
+  <h1 class="hero-title">For <em>You,</em><br/>Always</h1>
+  <p class="hero-subtitle">Every moment with you is one I never want to forget.</p>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- LETTER -->
+<section class="letter-section">
+  <div class="section-label">A letter for you</div>
+  <div class="letter-card">
+    <div class="letter-body">
+      <p>There are a thousand small things I love about you — the way you laugh, the way you see the world, the way you make ordinary days feel like something worth remembering.</p>
+      <p>I made this little corner of the internet just for us. A place to keep the moments that made me think: <em>I am so lucky to have her.</em></p>
+      <p>Every photo here is a piece of something real. Something ours. I hope when you scroll through them, you feel exactly what I felt when I was there with you.</p>
+      <p>I love you — more than I know how to say, so I made this instead.</p>
+    </div>
+    <div class="letter-sign">— Always yours ♡</div>
+  </div>
+</section>
+
+<!-- PHOTOS -->
+<section class="photos-section">
+  <div class="section-label">Our memories</div>
+  <div class="photos-grid" id="photosGrid"></div>
+</section>
+
+<div class="add-more-wrap">
+  <button class="add-more-btn" onclick="addNewCard()">
+    <span>+</span> Add another memory
+  </button>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span class="heart-float">♡</span>&nbsp; Thank you for being mine &nbsp;<span class="heart-float">♡</span>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <span class="lightbox-close" id="lbClose">✕</span>
+  <img id="lbImg" src="" alt="" />
+</div>
+
+<input type="file" id="fileInput" accept="image/*" />
+
+<script>
+  const defaultMemories = [
+    { caption: "The day everything felt perfect.", date: "Add a date" },
+    { caption: "Your smile in this moment — unforgettable.", date: "Add a date" },
+    { caption: "I remember this like it was yesterday.", date: "Add a date" },
+    { caption: "Somewhere I always want to return to.", date: "Add a date" },
+    { caption: "Just us. That was enough.", date: "Add a date" },
+    { caption: "One of my favorite versions of us.", date: "Add a date" },
+  ];
+
+  const grid = document.getElementById('photosGrid');
+  const fileInput = document.getElementById('fileInput');
+  let currentCardIndex = null;
+  let cardCount = 0;
+
+  function makeCard(caption, date) {
+    const i = cardCount++;
+    const card = document.createElement('div');
+    card.className = 'photo-card';
+    card.innerHTML = `
+      <div class="photo-frame" id="frame-${i}">
+        <div class="photo-placeholder" onclick="openFilePicker(${i})">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span>Tap to add photo</span>
+        </div>
+      </div>
+      <textarea class="photo-caption" rows="2" placeholder="Write something about this moment...">${caption}</textarea>
+      <input class="photo-date" type="text" placeholder="Date" value="${date}" />
+    `;
+    grid.appendChild(card);
+  }
+
+  function addNewCard() {
+    makeCard("Write something about this moment...", "");
+    const cards = grid.querySelectorAll('.photo-card');
+    const last = cards[cards.length - 1];
+    last.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  defaultMemories.forEach(m => makeCard(m.caption, m.date));
+
+  function openFilePicker(index) {
+    currentCardIndex = index;
+    fileInput.click();
+  }
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file || currentCardIndex === null) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const frame = document.getElementById(`frame-${currentCardIndex}`);
+      const src = ev.target.result;
+      frame.innerHTML = `<img src="${src}" alt="Memory" onclick="openLightbox('${src}')" />`;
+    };
+    reader.readAsDataURL(file);
+    fileInput.value = '';
+  });
+
+  // Lightbox
+  const lightbox = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lbImg');
+  document.getElementById('lbClose').onclick = () => lightbox.classList.remove('open');
+  lightbox.onclick = (e) => { if (e.target === lightbox) lightbox.classList.remove('open'); };
+
+  function openLightbox(src) {
+    lbImg.src = src;
+    lightbox.classList.add('open');
+  }
+
+  // Music
+  const audio = document.getElementById('bgMusic');
+  const musicBtn = document.getElementById('musicBtn');
+  const musicIcon = document.getElementById('musicIcon');
+  let playing = false;
+
+  function tryPlay() {
+    audio.play().then(() => {
+      playing = true;
+      musicBtn.classList.remove('paused');
+      musicIcon.textContent = '♪';
+    }).catch(() => {});
+  }
+
+  musicBtn.addEventListener('click', () => {
+    if (playing) {
+      audio.pause();
+      playing = false;
+      musicBtn.classList.add('paused');
+      musicIcon.textContent = '♩';
+    } else {
+      tryPlay();
+    }
+  });
+
+  // Try autoplay on first interaction
+  document.addEventListener('click', function startOnce() {
+    if (!playing) tryPlay();
+    document.removeEventListener('click', startOnce);
+  }, { once: true });
+</script>
+</body>
+</html>
